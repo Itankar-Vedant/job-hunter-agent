@@ -9,17 +9,29 @@ import time
 import urllib.parse
 
 def create_driver():
+    import os
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument('--disable-gpu')
+    options.add_argument('--window-size=1920,1080')
     options.add_argument('--disable-blink-features=AutomationControlled')
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+
+    chrome_bin = os.getenv("CHROME_BIN")
+    chromedriver_path = os.getenv("CHROMEDRIVER_PATH")
+
+    if chrome_bin:
+        options.binary_location = chrome_bin
+
+    if chromedriver_path:
+        service = Service(chromedriver_path)
+    else:
+        service = Service(ChromeDriverManager().install())
+
+    driver = webdriver.Chrome(service=service, options=options)
     return driver
 
 def build_search_link(title, location):
