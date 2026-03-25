@@ -1,3 +1,4 @@
+
 import sys
 print("🚀 AGENT STARTING...", flush=True)
 sys.stdout.flush()
@@ -8,6 +9,7 @@ from job_fetcher import fetch_foundit_jobs
 from ai_filter import filter_jobs_with_ai
 from whatsapp_sender import send_job_alerts
 from datetime import datetime
+from job_fetcher import fetch_jobs
 
 def run_agent():
     print(f"\n🤖 Agent running at {datetime.now().strftime('%H:%M %d-%m-%Y')}", flush=True)
@@ -15,7 +17,7 @@ def run_agent():
 
     try:
         print("📡 Step 1: Fetching jobs...", flush=True)
-        jobs = fetch_foundit_jobs()
+        jobs = fetch_jobs()
         print(f"✅ Fetched {len(jobs)} jobs", flush=True)
 
         if not jobs:

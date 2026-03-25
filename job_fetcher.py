@@ -1,80 +1,73 @@
 import requests
 from datetime import datetime
 
-def fetch_foundit_jobs():
+def fetch_jobs():
     all_jobs = []
 
     searches = [
-        ("full+stack+developer", "nagpur"),
-        ("full+stack+developer", "pune"),
-        ("full+stack+developer", "remote"),
-        ("technical+support", "nagpur"),
-        ("technical+support", "pune"),
-        ("technical+support", "remote"),
-        ("python+developer", "pune"),
-        ("python+developer", "nagpur"),
-        ("ai+developer", "pune"),
-        ("ai+developer", "remote"),
+        ("full-stack-developer", "nagpur"),
+        ("full-stack-developer", "pune"),
+        ("technical-support", "nagpur"),
+        ("technical-support", "pune"),
+        ("python-developer", "pune"),
+        ("ai-developer", "pune"),
     ]
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Accept": "application/json",
-        "Referer": "https://www.foundit.in/",
-        "Origin": "https://www.foundit.in",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://internshala.com/",
+        "X-Requested-With": "XMLHttpRequest",
     }
 
     for role, location in searches:
         try:
             print(f"🔍 Searching: {role} in {location}", flush=True)
 
-            url = "https://www.foundit.in/middleware/jobsearch/search"
-            params = {
-                "query": role,
-                "locations": location,
-                "experienceRanges": "0~1",
-                "limit": 10,
-                "offset": 0,
-                "sort": 1
-            }
+            url = f"https://internshala.com/jobs/{role}-jobs-in-{location}"
 
-            response = requests.get(
-                url,
-                params=params,
-                headers=headers,
-                timeout=15
-            )
-
+            response = requests.get(url, headers=headers, timeout=15)
             print(f"   Status: {response.status_code}", flush=True)
 
             if response.status_code == 200:
-                try:
-                    data = response.json()
-                    jobs = data.get('jobDetails', []) or data.get('jobs', []) or data.get('results', [])
-                    print(f"   Found {len(jobs)} jobs", flush=True)
+                from bs4 import BeautifulSoup
+                soup = BeautifulSoup(response.text, 'html.parser')
 
-                    for job in jobs[:8]:
-                        title = job.get('title', '') or job.get('jobTitle', '')
-                        company = job.get('companyName', '') or job.get('company', '')
-                        loc = job.get('location', '') or location
-                        job_id = job.get('jobId', '') or job.get('id', '')
-                        link = f"https://www.foundit.in/srp/results?query={role.replace(' ', '+')}&locations={location}"
+                job_cards = soup.find_all('div', class_='individual_internship') or \
+                            soup.find_all('div', class_='job-internship-card') or \
+                            soup.find_all('a', class_='job-title-href')
 
-                        if title:
+                print(f"   Found {len(job_cards)} jobs", flush=True)
+
+                for card in job_cards[:8]:
+                    try:
+                        title = card.find('h3') or card.find('h2') or \
+                                card.find('div', class_='job-title') or \
+                                card.find('p', class_='job-internship-name')
+                        company = card.find('p', class_='company-name') or \
+                                  card.find('div', class_='company-name') or \
+                                  card.find('a', class_='link_display_like_text')
+                        link_tag = card.find('a', href=True)
+
+                        title_text = title.text.strip() if title else "N/A"
+                        company_text = company.text.strip() if company else "N/A"
+                        link = "https://internshala.com" + link_tag['href'] \
+                               if link_tag and link_tag['href'].startswith('/') \
+                               else link_tag['href'] if link_tag else url
+
+                        if title_text != "N/A":
                             all_jobs.append({
-                                'title': title,
-                                'company': company,
-                                'location': loc,
+                                'title': title_text,
+                                'company': company_text,
+                                'location': location.capitalize(),
                                 'experience': 'Fresher',
                                 'link': link,
-                                'source': 'Foundit',
+                                'source': 'Internshala',
                                 'fetched_at': str(datetime.now())
                             })
-                except Exception as e:
-                    print(f"   ❌ Parse error: {e}", flush=True)
-                    print(f"   Response: {response.text[:200]}", flush=True)
-            else:
-                print(f"   ❌ Failed: {response.text[:200]}", flush=True)
+                    except:
+                        continue
 
         except Exception as e:
             print(f"❌ Error: {e}", flush=True)
@@ -95,7 +88,7 @@ def fetch_foundit_jobs():
 
 if __name__ == "__main__":
     print("🔍 Fetching jobs...\n")
-    jobs = fetch_foundit_jobs()
+    jobs = fetch_jobs()
 
     for i, job in enumerate(jobs[:10]):
         print(f"\n{i+1}. {job['title']}")
