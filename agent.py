@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
     run_agent()
 
-    schedule.every().day.at("09:00").do(run_agent)
+    schedule.every().day.at("11:00").do(run_agent)
 
     while True:
         schedule.run_pending()
