@@ -10,26 +10,23 @@ import urllib.parse
 import os
 
 def create_driver():
-    print("🔧 Setting up Chrome options...", flush=True)
-
+    import os
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
+    options.add_argument('--headless=new')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
+    options.add_argument('--disable-software-rasterizer')
+    options.add_argument('--disable-extensions')
+    options.add_argument('--disable-setuid-sandbox')
+    options.add_argument('--single-process')
+    options.add_argument('--no-zygote')
     options.add_argument('--window-size=1920,1080')
     options.add_argument('--remote-debugging-port=9222')
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
     chrome_bin = os.getenv("CHROME_BIN", "/usr/bin/chromium")
     chromedriver_path = os.getenv("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
-
-    print(f"🔧 Chrome binary: {chrome_bin}", flush=True)
-    print(f"🔧 ChromeDriver path: {chromedriver_path}", flush=True)
-    print(f"🔧 Chrome exists: {os.path.exists(chrome_bin)}", flush=True)
-    print(f"🔧 ChromeDriver exists: {os.path.exists(chromedriver_path)}", flush=True)
 
     options.binary_location = chrome_bin
     service = Service(chromedriver_path)
