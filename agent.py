@@ -5,11 +5,11 @@ sys.stdout.flush()
 
 import schedule
 import time
-from job_fetcher import fetch_foundit_jobs
+from job_fetcher import fetch_jobs
 from ai_filter import filter_jobs_with_ai
 from whatsapp_sender import send_job_alerts
 from datetime import datetime
-from job_fetcher import fetch_jobs
+
 
 def run_agent():
     print(f"\n🤖 Agent running at {datetime.now().strftime('%H:%M %d-%m-%Y')}", flush=True)
