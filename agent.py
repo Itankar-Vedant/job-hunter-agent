@@ -1,3 +1,7 @@
+import sys
+print("🚀 AGENT STARTING...", flush=True)
+sys.stdout.flush()
+
 import schedule
 import time
 from job_fetcher import fetch_foundit_jobs
@@ -6,44 +10,36 @@ from whatsapp_sender import send_job_alerts
 from datetime import datetime
 
 def run_agent():
-    print(f"\n🤖 Job Hunter Agent Started at {datetime.now().strftime('%H:%M %d-%m-%Y')}")
-    print("=" * 50)
+    print(f"\n🤖 Agent running at {datetime.now().strftime('%H:%M %d-%m-%Y')}", flush=True)
+    print("=" * 50, flush=True)
 
-    # Step 1 — Fetch jobs
-    print("\n📡 Step 1: Fetching jobs from Foundit...")
-    jobs = fetch_foundit_jobs()
-
-    if not jobs:
-        print("❌ No jobs fetched. Will retry next time.")
-        return
-
-    # Step 2 — Filter with AI
-    print("\n🧠 Step 2: AI filtering relevant jobs...")
-    filtered_jobs = filter_jobs_with_ai(jobs)
-
-    if not filtered_jobs:
-        print("❌ No relevant jobs found after filtering.")
-        send_job_alerts([])
-        return
-
-    # Step 3 — Send WhatsApp alerts
-    print("\n📱 Step 3: Sending WhatsApp alerts...")
-    send_job_alerts(filtered_jobs)
-
-    print(f"\n✅ Agent completed at {datetime.now().strftime('%H:%M %d-%m-%Y')}")
-    print(f"📊 Summary: Fetched {len(jobs)} jobs → Filtered to {len(filtered_jobs)} relevant jobs → Sent to WhatsApp")
-    print("=" * 50)
-
-
-if __name__ == "__main__":
-    print("🚀 Job Hunter Agent Launched!")
-    
     try:
-        run_agent()
+        print("📡 Step 1: Fetching jobs...", flush=True)
+        jobs = fetch_foundit_jobs()
+        print(f"✅ Fetched {len(jobs)} jobs", flush=True)
+
+        if not jobs:
+            print("❌ No jobs fetched.", flush=True)
+            return
+
+        print("🧠 Step 2: AI filtering...", flush=True)
+        filtered_jobs = filter_jobs_with_ai(jobs)
+        print(f"✅ Filtered to {len(filtered_jobs)} relevant jobs", flush=True)
+
+        print("📱 Step 3: Sending WhatsApp...", flush=True)
+        send_job_alerts(filtered_jobs)
+        print("✅ WhatsApp sent!", flush=True)
+
     except Exception as e:
-        print(f"❌ Agent error: {e}")
+        print(f"❌ ERROR: {e}", flush=True)
         import traceback
         traceback.print_exc()
+
+if __name__ == "__main__":
+    print("✅ Agent file loaded successfully", flush=True)
+    print("⏰ Scheduling daily at 9AM...", flush=True)
+
+    run_agent()
 
     schedule.every().day.at("09:00").do(run_agent)
 
