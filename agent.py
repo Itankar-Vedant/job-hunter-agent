@@ -37,13 +37,14 @@ def run_agent():
 
 if __name__ == "__main__":
     print("🚀 Job Hunter Agent Launched!")
-    print("⏰ Will run every morning at 9:00 AM automatically")
-    print("Press Ctrl+C to stop\n")
+    
+    try:
+        run_agent()
+    except Exception as e:
+        print(f"❌ Agent error: {e}")
+        import traceback
+        traceback.print_exc()
 
-    # Run immediately on start
-    run_agent()
-
-    # Then run every day at 9AM
     schedule.every().day.at("09:00").do(run_agent)
 
     while True:
