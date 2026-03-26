@@ -1,15 +1,13 @@
-
 import sys
-print("🚀 AGENT STARTING...", flush=True)
-sys.stdout.flush()
-
-import schedule
 import time
+import schedule
+from datetime import datetime
+
+print("🚀 AGENT STARTING...", flush=True)
+
 from job_fetcher import fetch_jobs
 from ai_filter import filter_jobs_with_ai
 from whatsapp_sender import send_job_alerts
-from datetime import datetime
-
 
 def run_agent():
     print(f"\n🤖 Agent running at {datetime.now().strftime('%H:%M %d-%m-%Y')}", flush=True)
@@ -30,21 +28,38 @@ def run_agent():
 
         print("📱 Step 3: Sending WhatsApp...", flush=True)
         send_job_alerts(filtered_jobs)
-        print("✅ WhatsApp sent!", flush=True)
+        print("✅ Done!", flush=True)
 
     except Exception as e:
         print(f"❌ ERROR: {e}", flush=True)
         import traceback
         traceback.print_exc()
+        print("⚠️ Agent will retry at next scheduled time", flush=True)
+
+def heartbeat():
+    print(f"💓 Agent alive at {datetime.now().strftime('%H:%M %d-%m-%Y')}", flush=True)
 
 if __name__ == "__main__":
-    print("✅ Agent file loaded successfully", flush=True)
-    print("⏰ Scheduling daily at 9AM...", flush=True)
+    print("✅ Agent loaded successfully", flush=True)
+    print("⏰ Scheduled to run daily at 9AM IST", flush=True)
 
+    # Schedule daily at 9AM IST
+    schedule.every().day.at("09:00").do(run_agent)
+
+    # Heartbeat every 30 mins so Railway knows agent is alive
+    schedule.every(30).minutes.do(heartbeat)
+
+    # Run once immediately on start
     run_agent()
 
-    schedule.every().day.at("11:00").do(run_agent)
+    print("\n⏳ Waiting for next scheduled run...", flush=True)
 
+    # Keep running forever — never exit
     while True:
-        schedule.run_pending()
-        time.sleep(60)
+        try:
+            schedule.run_pending()
+            time.sleep(30)
+        except Exception as e:
+            print(f"⚠️ Loop error: {e} — continuing...", flush=True)
+            time.sleep(30)
+            continue
